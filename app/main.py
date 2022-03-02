@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import posts, users, auth, likes
+from app.auth.routes import router as auth_router
+from app.likes.routes import router as likes_router
+from app.posts.routes import router as posts_router
+from app.users.routes import router as users_router
 from starlette.responses import RedirectResponse
 
 app = FastAPI()
@@ -21,7 +24,7 @@ async def docs_redirect():
     return RedirectResponse(url="/docs")
 
 
-app.include_router(posts.router)
-app.include_router(users.router)
-app.include_router(auth.router)
-app.include_router(likes.router)
+app.include_router(auth_router)
+app.include_router(likes_router)
+app.include_router(posts_router)
+app.include_router(users_router)

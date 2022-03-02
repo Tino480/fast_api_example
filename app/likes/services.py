@@ -1,22 +1,20 @@
-from fastapi import HTTPException, status, Depends, APIRouter
-from .. import models, schemas, oauth2
-from ..database import get_db
-from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from app.likes import schemas
+from app.likes.models import Like
+from app.users.models import User
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
-router = APIRouter(prefix="/likes", tags=["likes"])
 
-
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.LikeBase)
-def create_like(
+def like_post(
     like: schemas.LikeBase,
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(oauth2.get_current_user),
-):
+    db: Session,
+    current_user: User,
+) -> schemas.LikeBase:
     post_id, liked = like.post_id, like.liked
     old_like = (
-        db.query(models.Like)
-        .filter(models.Like.user_id == current_user.id, models.Like.post_id == post_id)
+        db.query(Like)
+        .filter(Like.user_id == current_user.id, Like.post_id == post_id)
         .first()
     )
 
@@ -36,7 +34,7 @@ def create_like(
         )
     else:
         try:
-            db.add(models.Like(user_id=current_user.id, post_id=post_id))
+            db.add(Like(user_id=current_user.id, post_id=post_id))
             db.commit()
         except SQLAlchemyError as e:
             db.rollback()
