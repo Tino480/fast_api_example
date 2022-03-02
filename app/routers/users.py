@@ -59,7 +59,6 @@ def verify_password(password: str) -> bool:
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if verify_password(user.password):
         hashed_password = hash(user.password)
-        print(f"hashed_password: {hashed_password}")
         user.password = hashed_password
         new_user = models.User(**user.dict())
         try:
