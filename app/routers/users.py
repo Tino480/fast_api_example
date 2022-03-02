@@ -44,18 +44,36 @@ def read_user(
     return get_user_dict(user)
 
 
+import re
+
+
+def verify_password(password: str) -> bool:
+    reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
+    pat = re.compile(reg)
+    mat = re.search(pat, password)
+    if mat:
+        return True
+    else:
+        return False
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserGet)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    hashed_password = hash(user.password)
-    user.password = hashed_password
-    new_user = models.User(**user.dict())
-    try:
-        db.add(new_user)
-        db.commit()
-        db.refresh(new_user)
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    return get_user_dict(new_user)
+    if verify_password(user.password):
+        hashed_password = hash(user.password)
+        user.password = hashed_password
+        new_user = models.User(**user.dict())
+        try:
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        return get_user_dict(new_user)
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Password is not valid"
+        )
 
 
 @router.put(
