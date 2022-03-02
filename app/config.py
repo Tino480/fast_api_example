@@ -13,10 +13,11 @@ class Settings(BaseSettings):
     DATABASE_PASSWORD: str
     DATABASE_USER: str
     DATABASE_NAME: str
+    PEPPER: str
 
     class config:
-        env_prefix = ''
-        env_file = '../.env' 
+        env_prefix = ""
+        env_file = "../.env"
 
 
 settings = Settings()

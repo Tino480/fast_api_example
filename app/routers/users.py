@@ -4,6 +4,7 @@ from ..database import get_db
 from ..utils import hash
 from sqlalchemy.orm import Session
 from typing import List
+import re
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -44,9 +45,6 @@ def read_user(
     return get_user_dict(user)
 
 
-import re
-
-
 def verify_password(password: str) -> bool:
     reg = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!#%*?&]{6,20}$"
     pat = re.compile(reg)
@@ -61,6 +59,7 @@ def verify_password(password: str) -> bool:
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     if verify_password(user.password):
         hashed_password = hash(user.password)
+        print(f"hashed_password: {hashed_password}")
         user.password = hashed_password
         new_user = models.User(**user.dict())
         try:
