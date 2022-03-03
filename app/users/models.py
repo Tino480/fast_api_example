@@ -1,5 +1,5 @@
 from app.database import Base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
@@ -13,6 +13,10 @@ class User(Base):
     )
     email = Column(String, nullable=False, unique=True)
     username = Column(String, nullable=False, unique=True)
+    role_id = Column(
+        Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False
+    )
+    role = relationship("Role", back_populates="users")
     password = Column(String, nullable=False)
     created_at = Column(
         TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False

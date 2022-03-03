@@ -1,4 +1,3 @@
-from xmlrpc.client import Boolean
 from app.database import Base
 from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship

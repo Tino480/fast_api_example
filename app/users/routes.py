@@ -1,5 +1,6 @@
 from fastapi import status, Depends, APIRouter
 from app.auth import services as auth_services
+from app.auth.models import RoleChecker
 from app.users.models import User
 from app.users import schemas
 from app.users import services
@@ -31,7 +32,11 @@ def read_user(
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.UserGet)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(
+    user: schemas.UserCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(auth_services.get_current_user),
+):
     return services.create_user(db, user)
 
 
@@ -59,7 +64,11 @@ def update_user_partial(
     return services.partialy_update_user(db, user_id, user)
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(RoleChecker(["superadmin"]))],
+)
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
